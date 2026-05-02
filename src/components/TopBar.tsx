@@ -24,7 +24,7 @@ export const TopBar = ({ isSidebarOpen, onToggleSidebar, onOpenSearch }: TopBarP
             onClick={onToggleSidebar}
             label={isSidebarOpen ? "Скрыть панель" : "Показать панель"}
           />
-          <div className="w-px h-5 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          <div className="w-px h-5 bg-linear-to-b from-transparent via-white/20 to-transparent" />
           <IconButton icon={<Menu size={18} />} onClick={() => {}} label="Меню" />
         </div>
 
@@ -35,9 +35,9 @@ export const TopBar = ({ isSidebarOpen, onToggleSidebar, onOpenSearch }: TopBarP
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+            className="w-2 h-2 rounded-full bg-linear-to-r from-purple-500 to-pink-500"
           />
-          <span className="text-sm font-bold tracking-wider bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent neon-text">
+          <span className="text-sm font-bold tracking-wider bg-linear-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent neon-text">
             OBSIDIAN WEB
           </span>
           <Sparkles size={12} className="text-purple-400 animate-pulse" />

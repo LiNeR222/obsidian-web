@@ -129,7 +129,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
   
   openFile: async (file: FileNode) => {
-    const { openTabs, activeFile } = get()
+    const { openTabs } = get()
     const alreadyOpen = openTabs.some(tab => tab.path === file.path)
     
     if (alreadyOpen) {

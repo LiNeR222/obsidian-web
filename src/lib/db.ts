@@ -41,7 +41,7 @@ const DB_VERSION = 1
 
 export async function initDB() {
   return openDB<ObsidianDB>(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion, newVersion, transaction) {
+    upgrade(db, oldVersion, newVersion) {
       console.log(`Upgrading DB from version ${oldVersion} to ${newVersion}`)
       
       // Хранилище для дерева файлов

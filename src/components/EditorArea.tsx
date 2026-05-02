@@ -94,7 +94,7 @@ export const EditorArea = () => {
                   className={cn("flex items-center gap-2 px-3 py-2 text-sm cursor-pointer border-r border-white/10 group transition-all", activeFile?.path === tab.path && "bg-purple-600/20 border-b-2 border-purple-500")}
                   onClick={() => setActiveFile(tab)}
                 >
-                  <span className="truncate max-w-[150px]">{tab.name}</span>
+                  <span className="truncate max-w-37.5">{tab.name}</span>
                   <button className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity" onClick={(e) => { e.stopPropagation(); closeTab(tab.path) }}>✕</button>
                 </motion.div>
               ))}
@@ -104,7 +104,7 @@ export const EditorArea = () => {
             {isSaving && <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mr-1" />}
             <button onClick={handleSave} className="p-1.5 rounded hover:bg-white/10 transition-all" title="Сохранить (Ctrl+S)"><Save size={16} className="text-gray-400" /></button>
             <div className="w-px h-4 bg-white/10 mx-1" />
-            {(['edit', 'preview', 'split'] as ViewMode[]).map((mode, i) => (
+            {(['edit', 'preview', 'split'] as ViewMode[]).map((mode) => (
               <button key={mode} onClick={() => setViewMode(mode)} className={cn("p-1.5 rounded transition-all", viewMode === mode && "bg-purple-600/30 text-purple-400")} title={`Режим ${mode === 'edit' ? 'редактирования' : mode === 'preview' ? 'просмотра' : 'split'} (Ctrl+E)`}>
                 {mode === 'edit' ? <Edit3 size={16} /> : mode === 'preview' ? <Eye size={16} /> : <Split size={16} />}
               </button>

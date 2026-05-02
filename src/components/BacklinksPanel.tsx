@@ -25,7 +25,7 @@ export const BacklinksPanel = ({ currentPath }: BacklinksPanelProps) => {
       transition={{ duration: 0.4 }}
       className="gradient-border mt-auto"
     >
-      <div className="p-4 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-lg">
+      <div className="p-4 bg-linear-to-br from-purple-500/5 to-pink-500/5 rounded-lg">
         <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">
           <motion.div
             animate={{ rotate: currentBacklinks.length > 0 ? 360 : 0 }}

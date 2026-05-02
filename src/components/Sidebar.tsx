@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion} from 'framer-motion'
 import { Folder, File, ChevronRight, ChevronDown, MoreHorizontal, FilePlus, FolderPlus, Pencil, Trash2 } from 'lucide-react'
 import { Button } from './ui/Button'
-import { cn } from '../lib/utils'
 import { useFileStore, type FileNode } from '../store/useFileStore'
 import { useGithubStore } from '../store/useGithubStore'
 import { ContextMenu } from './ui/ContextMenu'
@@ -70,7 +69,7 @@ const FileTree = ({ nodes, level = 0 }: FileTreeProps) => {
               {/* Стрелка для папок */}
               {node.type === 'folder' && (
                 <button
-                  className="p-0.5 text-gray-500 hover:text-white transition-colors w-4 h-4 flex items-center justify-center flex-shrink-0"
+                  className="p-0.5 text-gray-500 hover:text-white transition-colors w-4 h-4 flex items-center justify-center shrink-0"
                   onClick={(e) => {
                     e.stopPropagation()
                     toggleFolder(node.path)
@@ -85,13 +84,13 @@ const FileTree = ({ nodes, level = 0 }: FileTreeProps) => {
               )}
               
               {/* Пустое место для файлов (чтобы сохранить выравнивание) */}
-              {node.type === 'file' && <div className="w-4 flex-shrink-0" />}
+              {node.type === 'file' && <div className="w-4 shrink-0" />}
               
               {/* Иконка типа файла */}
               {node.type === 'folder' ? (
-                <Folder size={14} className="text-blue-400 flex-shrink-0" />
+                <Folder size={14} className="text-blue-400 shrink-0" />
               ) : (
-                <File size={14} className="text-gray-500 flex-shrink-0" />
+                <File size={14} className="text-gray-500 shrink-0" />
               )}
               
               {/* Название */}
@@ -99,7 +98,7 @@ const FileTree = ({ nodes, level = 0 }: FileTreeProps) => {
               
               {/* Кнопка контекстного меню */}
               <button
-                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/10 transition-all flex-shrink-0 mr-1"
+                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/10 transition-all shrink-0 mr-1"
                 onClick={(e) => {
                   e.stopPropagation()
                   const rect = e.currentTarget.getBoundingClientRect()
@@ -184,7 +183,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
       initial={false}
       animate={{ width: isOpen ? 280 : 0, opacity: isOpen ? 1 : 0 }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="border-r border-white/10 bg-[#0f0f1a] flex flex-col overflow-hidden flex-shrink-0"
+      className="border-r border-white/10 bg-[#0f0f1a] flex flex-col overflow-hidden shrink-0"
       style={{ width: isOpen ? 280 : 0 }}
     >
       {/* Заголовок */}

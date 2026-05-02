@@ -55,10 +55,10 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 400 }}
-            className="fixed top-[20%] left-1/2 -translate-x-1/2 w-[600px] max-w-[90vw] z-50"
+            className="fixed top-[20%] left-1/2 -translate-x-1/2 w-150 max-w-[90vw] z-50"
           >
             <div className="gradient-border">
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1a] rounded-lg overflow-hidden">
+              <div className="bg-linear-to-br from-[#1a1a2e] to-[#0f0f1a] rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 p-4 border-b border-white/10">
                   <Search size={18} className="text-purple-400" />
                   <input
@@ -71,7 +71,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                   />
                   <kbd className="text-xs text-gray-500 px-2 py-1 rounded bg-white/5">ESC</kbd>
                 </div>
-                <div className="max-h-[400px] overflow-auto p-2">
+                <div className="max-h-100 overflow-auto p-2">
                   {results.length === 0 ? (
                     <div className="text-center text-gray-500 py-8">
                       <Sparkles size={32} className="mx-auto mb-2 opacity-50" />
@@ -84,7 +84,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.03 }}
-                        className={cn("flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-all", selectedIndex === index && "bg-gradient-to-r from-purple-600/30 to-pink-600/30")}
+                        className={cn("flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-all", selectedIndex === index && "bg-linear-to-r from-purple-600/30 to-pink-600/30")}
                         onClick={() => { openFile(file); onClose(); setQuery('') }}
                         onMouseEnter={() => setSelectedIndex(index)}
                       >

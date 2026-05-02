@@ -5,7 +5,6 @@ import { useFileStore } from '../store/useFileStore'
 import { Modal } from './ui/Modal'
 import { GithubAuth } from './GithubAuth'
 import { Button } from './ui/Button'
-import { cn } from '../lib/utils'
 
 export const GithubStatus = () => {
   const { 
@@ -13,8 +12,6 @@ export const GithubStatus = () => {
     syncStatus, 
     pullFromGithub, 
     pushToGithub, 
-    isLoading,
-    lastSync
   } = useGithubStore()
   const { files, setFiles } = useFileStore()
   const [isModalOpen, setIsModalOpen] = useState(false)

@@ -41,7 +41,7 @@ export const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-[180px] bg-[#1a1a2e] border border-white/10 rounded-lg shadow-xl py-1 animate-fade-in"
+      className="fixed z-50 min-w-45 bg-[#1a1a2e] border border-white/10 rounded-lg shadow-xl py-1 animate-fade-in"
       style={{ left: x, top: y }}
     >
       {items.map((item, index) => (

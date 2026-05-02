@@ -9,8 +9,7 @@ interface GithubAuthProps {
 }
 
 export const GithubAuth = ({ onClose }: GithubAuthProps) => {
-  const { 
-    token, 
+  const {  
     isAuthenticated, 
     repos, 
     currentRepo, 
