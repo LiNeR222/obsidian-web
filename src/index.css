@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-purple: #c084fc;
+  --color-neon-pink: #f472b6;
+  --color-neon-blue: #60a5fa;
+  --color-neon-cyan: #22d3ee;
+  --color-glass-bg: rgba(15, 15, 26, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-neon: 0 0 20px rgba(192, 132, 252, 0.3);
+  --shadow-neon-strong: 0 0 40px rgba(192, 132, 252, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a14 0%, #12121c 50%, #0f0f1a 100%);
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(15, 15, 26, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-strong {
+  background: rgba(15, 15, 26, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Neon text */
+.neon-text {
+  text-shadow: 0 0 10px rgba(192, 132, 252, 0.5), 0 0 20px rgba(192, 132, 252, 0.3);
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, #1e1e2e, #0f0f1a);
+  border-radius: 12px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, #c084fc, #60a5fa, #f472b6);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #c084fc, #60a5fa);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #d094ff, #80b5ff);
+}
+
+/* CodeMirror custom */
+.cm-editor {
+  background: transparent !important;
+}
+
+.cm-gutters {
+  background: transparent !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.cm-activeLine {
+  background: linear-gradient(90deg, rgba(192, 132, 252, 0.08), transparent) !important;
+}
+
+.cm-cursor {
+  border-left-color: #c084fc !important;
+}
+
+/* Markdown preview */
+.markdown-preview h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #c084fc, #60a5fa);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 1rem;
+}
+
+.markdown-preview a {
+  color: #c084fc;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: all 0.2s;
+}
+
+.markdown-preview a:hover {
+  color: #f472b6;
+  text-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+}
+
+.markdown-preview code {
+  background: rgba(192, 132, 252, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #f472b6;
+}
+
+.markdown-preview pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* Animations */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(192, 132, 252, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(192, 132, 252, 0.6);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fade-slide {
+  animation: fadeSlideUp 0.3s ease-out;
+}
+
+.animate-glow {
+  animation: glowPulse 2s infinite;
+}
+
+.animate-spin-custom {
+  animation: spin 1s linear infinite;
+}
