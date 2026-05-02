@@ -22,6 +22,20 @@ interface GithubStore {
   syncWithGithub: (files: FileNode[]) => Promise<boolean>
 }
 
+// Функция для правильного кодирования UTF-8 в base64
+const toBase64 = (str: string): string => {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  let binary = ''
+  data.forEach(byte => {
+    binary += String.fromCharCode(byte)
+  })
+  return btoa(binary)
+}
+
+// Служебные файлы, которые не нужно пушить
+const SKIP_FILES = ['.gitignore', '.env', '.DS_Store', 'Thumbs.db', '.gitattributes', '.editorconfig']
+
 export const useGithubStore = create<GithubStore>((set, get) => ({
   token: localStorage.getItem('github_token'),
   isAuthenticated: !!localStorage.getItem('github_token'),
@@ -45,42 +59,30 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
   
   loadRepos: async () => {
     const { token } = get()
-    if (!token) {
-      console.log('❌ No token, cannot load repos')
-      return
-    }
+    if (!token) return
     
-    console.log('🔄 Loading repos from GitHub...')
     set({ isLoading: true })
-    
     try {
       const octokit = new Octokit({ auth: token })
       const response = await octokit.rest.repos.listForAuthenticatedUser({
         sort: 'updated',
         per_page: 100
       })
-      
-      console.log(`✅ Loaded ${response.data.length} repos`)
       set({ repos: response.data, isLoading: false })
     } catch (error) {
-      console.error('❌ Failed to load repos:', error)
+      console.error('Failed to load repos:', error)
       set({ isLoading: false })
     }
   },
   
   setCurrentRepo: (repo: string) => {
-    console.log('📁 Setting current repo:', repo)
     localStorage.setItem('github_repo', repo)
     set({ currentRepo: repo })
   },
   
   init: async () => {
     const { isAuthenticated, token, repos, loadRepos } = get()
-    
-    console.log('🔧 Initializing GithubStore', { isAuthenticated, hasToken: !!token, reposCount: repos.length })
-    
     if (isAuthenticated && token && repos.length === 0) {
-      console.log('🔄 Auto-loading repos on init')
       await loadRepos()
     }
   },
@@ -88,24 +90,13 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
   pullFromGithub: async () => {
     const { token, currentRepo, currentBranch } = get()
     
-    console.log('🔍 PullFromGithub started', { 
-      hasToken: !!token, 
-      currentRepo, 
-      currentBranch 
-    })
-    
-    if (!token || !currentRepo) {
-      console.log('❌ No token or repo')
-      return null
-    }
+    if (!token || !currentRepo) return null
     
     set({ syncStatus: 'syncing', isLoading: true })
     
     try {
       const octokit = new Octokit({ auth: token })
       const [owner, repo] = currentRepo.split('/')
-      
-      console.log(`📡 Fetching tree from ${owner}/${repo} (${currentBranch})`)
       
       const response = await octokit.rest.git.getTree({
         owner,
@@ -114,30 +105,12 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
         recursive: '1'
       })
       
-      console.log(`📁 Got tree: ${response.data.tree.length} total items`)
-      
       const allFiles = response.data.tree.filter(item => item.type === 'blob')
-      console.log(`📄 Found ${allFiles.length} files in repository`)
-      
-      if (allFiles.length === 0) {
-        console.log('⚠️ No files found in repository')
-        set({ syncStatus: 'success', isLoading: false })
-        return []
-      }
-      
-      const fileTypes = new Map<string, number>()
-      allFiles.forEach(item => {
-        const ext = item.path?.split('.').pop() || 'no extension'
-        fileTypes.set(ext, (fileTypes.get(ext) || 0) + 1)
-      })
-      console.log('📊 File types distribution:', Object.fromEntries(fileTypes))
       
       const files: FileNode[] = []
       const folders: { [key: string]: FileNode } = {}
-      let loadedCount = 0
-      let skippedCount = 0
       
-      const textExtensions = ['md', 'txt', 'json', 'js', 'ts', 'jsx', 'tsx', 'css', 'html', 'xml', 'yaml', 'yml', 'toml', 'env', 'gitignore', 'mdx']
+      const textExtensions = ['md', 'txt', 'json', 'js', 'ts', 'jsx', 'tsx', 'css', 'html', 'xml', 'yaml', 'yml', 'toml', 'env']
       
       for (const item of allFiles) {
         try {
@@ -156,13 +129,10 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
               
               if ('content' in contentResponse.data) {
                 content = atob(contentResponse.data.content.replace(/\n/g, ''))
-                loadedCount++
               }
             } catch (e) {
-              skippedCount++
+              // Пропускаем бинарные файлы
             }
-          } else {
-            skippedCount++
           }
           
           const name = item.path!.split('/').pop() || item.path!
@@ -192,19 +162,12 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
             content: content,
             children: undefined
           })
-          
-          if (loadedCount % 50 === 0) {
-            console.log(`📦 Progress: ${loadedCount} files loaded, ${skippedCount} skipped`)
-          }
         } catch (err) {
-          console.error(`❌ Failed to process ${item.path}:`, err)
-          skippedCount++
+          console.error(`Failed to process ${item.path}:`, err)
         }
       }
       
-      console.log(`✅ Loaded: ${loadedCount} files, Skipped: ${skippedCount} files`)
-      console.log(`📦 Total items collected: ${files.length}`)
-      
+      // Построение дерева
       const buildTree = (items: FileNode[]): FileNode[] => {
         const root: FileNode[] = []
         const folderMap: { [key: string]: FileNode } = {}
@@ -264,7 +227,6 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       }
       
       const fileTree = buildTree(files)
-      console.log('🌲 Final tree has', fileTree.length, 'root items')
       
       set({ 
         syncStatus: 'success', 
@@ -274,7 +236,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       
       return fileTree
     } catch (error) {
-      console.error('❌ GitHub pull error:', error)
+      console.error('GitHub pull error:', error)
       set({ syncStatus: 'error', isLoading: false })
       return null
     }
@@ -283,10 +245,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
   pushToGithub: async (files: FileNode[]) => {
     const { token, currentRepo, currentBranch } = get()
     
-    if (!token || !currentRepo) {
-      console.log('❌ No token or repo for push')
-      return false
-    }
+    if (!token || !currentRepo) return false
     
     set({ syncStatus: 'syncing', isLoading: true })
     
@@ -294,8 +253,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       const octokit = new Octokit({ auth: token })
       const [owner, repo] = currentRepo.split('/')
       
-      console.log(`📤 Pushing to ${owner}/${repo}`)
-      
+      // Получаем текущий коммит
       const refResponse = await octokit.rest.git.getRef({
         owner,
         repo,
@@ -312,18 +270,31 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       
       const currentTreeSha = commitResponse.data.tree.sha
       
+      // Рекурсивная функция для создания blobs
       const processNode = async (node: FileNode, currentPath: string = ''): Promise<any[]> => {
         const items: any[] = []
         const fullPath = currentPath ? `${currentPath}/${node.name}` : node.name
         
+        // Пропускаем служебные файлы
+        if (SKIP_FILES.includes(node.name)) {
+          console.log(`⏭️ Skipping file: ${node.name}`)
+          return items
+        }
+        
         if (node.type === 'file' && node.content) {
-          const content = btoa(unescape(encodeURIComponent(node.content)))
-          items.push({
-            path: fullPath,
-            mode: '100644' as const,
-            type: 'blob' as const,
-            content: content
-          })
+          try {
+            // Используем правильное кодирование UTF-8 в base64
+            const content = toBase64(node.content)
+            
+            items.push({
+              path: fullPath,
+              mode: '100644' as const,
+              type: 'blob' as const,
+              content: content
+            })
+          } catch (err) {
+            console.error(`Failed to encode ${node.name}:`, err)
+          }
         } else if (node.type === 'folder' && node.children) {
           for (const child of node.children) {
             items.push(...await processNode(child, fullPath))
@@ -338,8 +309,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
         allItems.push(...await processNode(file))
       }
       
-      console.log(`📦 Prepared ${allItems.length} items for commit`)
-      
+      // Создаём новое дерево
       const newTreeResponse = await octokit.rest.git.createTree({
         owner,
         repo,
@@ -347,6 +317,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
         tree: allItems
       })
       
+      // Создаём коммит
       const newCommitResponse = await octokit.rest.git.createCommit({
         owner,
         repo,
@@ -355,6 +326,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
         parents: [currentCommitSha]
       })
       
+      // Обновляем ссылку
       await octokit.rest.git.updateRef({
         owner,
         repo,
@@ -373,7 +345,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       
       return true
     } catch (error) {
-      console.error('❌ GitHub push error:', error)
+      console.error('GitHub push error:', error)
       set({ syncStatus: 'error', isLoading: false })
       return false
     }
