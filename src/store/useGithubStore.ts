@@ -22,7 +22,7 @@ interface GithubStore {
   syncWithGithub: (files: FileNode[]) => Promise<boolean>
 }
 
-// Функция для правильного кодирования UTF-8 в base64
+// Функция для кодирования бинарных данных (только если нужно)
 const toBase64 = (str: string): string => {
   const encoder = new TextEncoder()
   const data = encoder.encode(str)
@@ -33,8 +33,19 @@ const toBase64 = (str: string): string => {
   return btoa(binary)
 }
 
+// Определяем, какие файлы являются текстовыми (не требуют base64)
+const isTextFile = (filename: string): boolean => {
+  const textExtensions = [
+    '.md', '.txt', '.json', '.js', '.ts', '.jsx', '.tsx',
+    '.css', '.html', '.xml', '.yaml', '.yml', '.toml', '.env',
+    '.gitignore', '.editorconfig', '.prettierrc', '.eslintrc'
+  ]
+  const ext = filename.substring(filename.lastIndexOf('.')).toLowerCase()
+  return textExtensions.includes(ext) || !ext // файлы без расширения считаем текстовыми
+}
+
 // Служебные файлы, которые не нужно пушить
-const SKIP_FILES = ['.gitignore', '.env', '.DS_Store', 'Thumbs.db', '.gitattributes', '.editorconfig']
+const SKIP_FILES = ['.DS_Store', 'Thumbs.db', '.vercel', 'node_modules']
 
 export const useGithubStore = create<GithubStore>((set, get) => ({
   token: localStorage.getItem('github_token'),
@@ -110,15 +121,15 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
       const files: FileNode[] = []
       const folders: { [key: string]: FileNode } = {}
       
-      const textExtensions = ['md', 'txt', 'json', 'js', 'ts', 'jsx', 'tsx', 'css', 'html', 'xml', 'yaml', 'yml', 'toml', 'env']
+      const textExtensions = ['.md', '.txt', '.json', '.js', '.ts', '.jsx', '.tsx', '.css', '.html', '.xml', '.yaml', '.yml', '.toml', '.env']
       
       for (const item of allFiles) {
         try {
           const ext = item.path?.split('.').pop()?.toLowerCase() || ''
-          const isTextFile = textExtensions.includes(ext) || !ext
+          const isTextFileLocal = textExtensions.includes(`.${ext}`) || !ext
           let content = ''
           
-          if (isTextFile && item.size && item.size < 100000) {
+          if (isTextFileLocal && item.size && item.size < 100000) {
             try {
               const contentResponse = await octokit.rest.repos.getContent({
                 owner,
@@ -277,14 +288,23 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
         
         // Пропускаем служебные файлы
         if (SKIP_FILES.includes(node.name)) {
-          console.log(`⏭️ Skipping file: ${node.name}`)
           return items
         }
         
         if (node.type === 'file' && node.content) {
           try {
-            // Используем правильное кодирование UTF-8 в base64
-            const content = toBase64(node.content)
+            let content: string
+            
+            // 🔥 ГЛАВНОЕ ИСПРАВЛЕНИЕ: текстовые файлы отправляем как строку, а не base64!
+            if (isTextFile(node.name)) {
+              // Для текстовых файлов отправляем обычную строку
+              content = node.content
+              console.log(`📄 Sending as text: ${node.name}`)
+            } else {
+              // Для бинарных файлов кодируем в base64
+              content = toBase64(node.content)
+              console.log(`📦 Sending as base64: ${node.name}`)
+            }
             
             items.push({
               path: fullPath,
@@ -293,7 +313,7 @@ export const useGithubStore = create<GithubStore>((set, get) => ({
               content: content
             })
           } catch (err) {
-            console.error(`Failed to encode ${node.name}:`, err)
+            console.error(`Failed to process ${node.name}:`, err)
           }
         } else if (node.type === 'folder' && node.children) {
           for (const child of node.children) {
